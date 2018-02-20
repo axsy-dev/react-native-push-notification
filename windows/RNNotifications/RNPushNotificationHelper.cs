@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using Newtonsoft.Json;
+using System.IO;
 using System.Threading.Tasks;
 using Windows.Data.Xml.Dom;
 using Windows.UI.Notifications;
@@ -7,20 +8,24 @@ namespace RNNotifications
 {
     class RNPushNotificationHelper
     {
-        internal static void SendToast(string message)
+        internal static void SendToast(Notification notification)
         {
-            var doc = MakeDoc(message).Result;
-            var notification = new ToastNotification(doc);
+            var doc = MakeDoc(notification).Result;
+            var toastNotification = new ToastNotification(doc)
+            {
+                Tag = notification.payload.id.ToString(),
+                Group = "RNNotifications"
+            };
 
-            ToastNotificationManager.CreateToastNotifier().Show(notification);
+            ToastNotificationManager.CreateToastNotifier().Show(toastNotification);
         }
 
-        static async Task<XmlDocument> MakeDoc(string content)
+        static async Task<XmlDocument> MakeDoc(Notification notification)
         {
             using (var stream = new MemoryStream())
             using (var reader = new StreamReader(stream))
             {
-                await BuildNotificationXml(stream, content);
+                await BuildNotificationXml(stream, notification);
                 stream.Position = 0;
                 var xml = await reader.ReadToEndAsync();
                 var doc = new XmlDocument();
@@ -29,7 +34,7 @@ namespace RNNotifications
             }
         }
 
-        static async Task BuildNotificationXml(Stream stream, string content)
+        static async Task BuildNotificationXml(Stream stream, Notification notification)
         {
             System.Xml.XmlWriterSettings settings = new System.Xml.XmlWriterSettings();
             settings.OmitXmlDeclaration = true;
@@ -39,14 +44,15 @@ namespace RNNotifications
             {
                 await writer.WriteStartElementAsync(null, "toast", null);
                 await writer.WriteAttributeStringAsync(null, "activationType", null, "foreground");
+                await writer.WriteAttributeStringAsync(null, "launch", null, JsonConvert.SerializeObject(notification));
 
                 await writer.WriteStartElementAsync(null, "visual", null);
                 await writer.WriteStartElementAsync(null, "binding", null);
                 await writer.WriteAttributeStringAsync(null, "template", null, "ToastText01");
 
                 await writer.WriteStartElementAsync(null, "text", null);
-                await writer.WriteAttributeStringAsync(null, "id", null, "1");
-                await writer.WriteStringAsync(content);
+                await writer.WriteAttributeStringAsync(null, "id", null, notification.payload.id.ToString());
+                await writer.WriteStringAsync(notification.payload.body);
                 await writer.WriteEndElementAsync();
 
                 await writer.WriteEndElementAsync();
@@ -85,7 +91,7 @@ namespace RNNotifications
 
         internal static void ScheduleNotification(ScheduledNotification notification)
         {
-            var toast = new ScheduledToastNotification(MakeDoc(notification.message).Result, notification.date);
+            var toast = new ScheduledToastNotification(MakeDoc(notification).Result, notification.date);
             ToastNotificationManager.CreateToastNotifier().AddToSchedule(toast);
         }
 

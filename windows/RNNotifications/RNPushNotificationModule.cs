@@ -3,6 +3,7 @@ using ReactNative.Bridge;
 using ReactNative.Modules.Core;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using Windows.ApplicationModel.Background;
 using Windows.Networking.PushNotifications;
 
@@ -11,6 +12,8 @@ namespace RNNotifications
     public sealed class RNPushNotificationModule : ReactContextNativeModuleBase
     {
         static EventHandler PushNotificationReceivedInBackground;
+
+        static int currentid = 1;
 
         public RNPushNotificationModule(ReactContext reactContext)
             : base(reactContext)
@@ -29,7 +32,7 @@ namespace RNNotifications
             }
         }
 
-        public static async void RegisterBackgroundTask()
+        public static async void RegisterBackgroundNotificationTask()
         {
             var result = await BackgroundExecutionManager.RequestAccessAsync();
 
@@ -59,6 +62,7 @@ namespace RNNotifications
         {
             var channel = await PushNotificationChannelManager.CreatePushNotificationChannelForApplicationAsync();
             channel.PushNotificationReceived += OnPushNotification;
+            Debug.WriteLine(channel.Uri);
 
             Context
                 .GetJavaScriptModule<RCTDeviceEventEmitter>()
@@ -100,26 +104,28 @@ namespace RNNotifications
 
         static void OnPushNotificationReceivedInBackground(object sender, EventArgs args)
         {
-            var notification = (RawNotification)sender;
+            var rawNotification = (RawNotification)sender;
 
-            if (notification != null)
+            if (rawNotification != null)
             {
-                var jsonData = JsonConvert.DeserializeObject<PushNotification>(notification.Content);
-                RNPushNotificationHelper.SendToast(jsonData.payload.title);
-                RNPushNotificationHelper.SetBadgeNumber(jsonData.badge);
+                var notification = JsonConvert.DeserializeObject<Notification>(rawNotification.Content);
+                notification.payload.id = currentid;
+                RNPushNotificationHelper.SendToast(notification);
+                RNPushNotificationHelper.SetBadgeNumber(notification.badge);
+                currentid++;
             }
         }
 
         [ReactMethod]
         public void requestPermissions(string senderId)
         {
-            // Not required on Windows
+            Debug.WriteLine(senderId);
         }
 
         [ReactMethod]
-        public void presentLocalNotification(string message)
+        public void presentLocalNotification(Notification notification)
         {
-            RNPushNotificationHelper.SendToast(message);
+            RNPushNotificationHelper.SendToast(notification);
         }
 
         [ReactMethod]
@@ -131,6 +137,7 @@ namespace RNNotifications
         [ReactMethod]
         public void getInitialNotification(IPromise promise)
         {
+            // TODO: Get this done correctly, needs to send back a notificaton if there is one to send back...
             promise.Resolve(new { });
         }
 
@@ -141,7 +148,7 @@ namespace RNNotifications
         }
 
         [ReactMethod]
-        public void cancelLocalNotifications(object details)
+        public void cancelLocalNotifications()
         {
             RNPushNotificationHelper.ClearAll();
         }
@@ -154,31 +161,26 @@ namespace RNNotifications
         }
 
         [ReactMethod]
-        public void registerNotificationActions(object details)
+        public void registerNotificationActions()
         {
-            // Not implemented yet.
+            throw new NotImplementedException();
         }
     }
 
-    internal class PushNotification
+    public class Notification
     {
         public Payload payload { get; set; }
 
         public int badge { get; set; }
     }
 
-    internal class Payload
+    public class Payload
     {
         public string title { get; set; }
 
         public string body { get; set; }
-    }
 
-    public class Notification
-    {
-        public string title { get; set; }
-
-        public string message { get; set; }
+        public int id { get; set; }
     }
 
     public class ScheduledNotification : Notification

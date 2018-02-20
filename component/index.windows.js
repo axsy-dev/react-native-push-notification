@@ -47,7 +47,7 @@ NotificationsComponent.prototype.scheduleLocalNotification = function(details: O
 };
 
 NotificationsComponent.prototype.setApplicationIconBadgeNumber = function(number: number) {
-       RNPushNotification.setApplicationIconBadgeNumber(number);
+    RNPushNotification.setApplicationIconBadgeNumber(number);
 };
 
 NotificationsComponent.prototype.abandonPermissions = function() {
@@ -109,4 +109,3 @@ module.exports = {
 	state: false,
 	component: new NotificationsComponent()
 };
-
