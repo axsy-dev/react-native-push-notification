@@ -17,31 +17,37 @@ var NotificationsComponent = function() {
 };
 
 NotificationsComponent.prototype.getInitialNotification = function () {
-	/* Void */
+    return RNPushNotification.getInitialNotification()
+        .then(function (notification) {
+            if (notification && notification.dataJSON) {
+                return JSON.parse(notification.dataJSON);
+            }
+            return null;
+        });
 };
 
 NotificationsComponent.prototype.requestPermissions = function(senderID: string) {
-	/* Void */
+	RNPushNotification.requestPermissions(senderID);
 };
 
 NotificationsComponent.prototype.cancelLocalNotifications = function(details: Object) {
-	/* Void */
+	RNPushNotification.cancelLocalNotifications(details);
 };
 
 NotificationsComponent.prototype.cancelAllLocalNotifications = function() {
-	/* Void */
+	RNPushNotification.cancelAllLocalNotifications();
 };
 
 NotificationsComponent.prototype.presentLocalNotification = function(details: Object) {
-	/* Void */
+	RNPushNotification.presentLocalNotification(details);
 };
 
 NotificationsComponent.prototype.scheduleLocalNotification = function(details: Object) {
-	/* Void */
+	RNPushNotification.scheduleLocalNotification(details);
 };
 
 NotificationsComponent.prototype.setApplicationIconBadgeNumber = function(number: number) {
-	/* Void */
+       RNPushNotification.setApplicationIconBadgeNumber(number);
 };
 
 NotificationsComponent.prototype.abandonPermissions = function() {
@@ -92,11 +98,11 @@ NotificationsComponent.prototype.removeEventListener = function(type: string, ha
 }
 
 NotificationsComponent.prototype.registerNotificationActions = function(details: Object) {
-	/* Void */
+	RNPushNotification.registerNotificationActions(details);
 }
 
 NotificationsComponent.prototype.clearAllNotifications = function() {
-	/* Void */
+	RNPushNotification.clearAllNotifications()
 }
 
 module.exports = {

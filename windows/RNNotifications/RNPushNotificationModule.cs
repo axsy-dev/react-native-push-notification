@@ -18,7 +18,7 @@ namespace RNNotifications
             PushNotificationReceivedInBackground += OnPushNotificationReceivedInBackground;
         }
 
-        public override string Name => "RNPushNotificationModule";
+        public override string Name => "RNPushNotification";
 
         public override IReadOnlyDictionary<string, object> Constants
         {
@@ -45,7 +45,7 @@ namespace RNNotifications
                 }
             }
 
-            if(!taskRegistered)
+            if (!taskRegistered)
             {
                 var builder = new BackgroundTaskBuilder();
                 builder.Name = pushNotificationName;
@@ -84,7 +84,7 @@ namespace RNNotifications
                     notificationContent = args.RawNotification.Content;
                     Context
                         .GetJavaScriptModule<RCTDeviceEventEmitter>()
-                        .emit("notificationReceived", new { content = notificationContent });
+                        .emit("remoteNotificationReceived", new { content = notificationContent });
                     break;
                 default:
                     break;
@@ -102,7 +102,7 @@ namespace RNNotifications
         {
             var notification = (RawNotification)sender;
 
-            if(notification != null)
+            if (notification != null)
             {
                 var jsonData = JsonConvert.DeserializeObject<PushNotification>(notification.Content);
                 RNPushNotificationHelper.SendToast(jsonData.payload.title);
@@ -111,9 +111,9 @@ namespace RNNotifications
         }
 
         [ReactMethod]
-        public void requestPermissions()
+        public void requestPermissions(string senderId)
         {
-            throw new NotImplementedException();
+            // Not required on Windows
         }
 
         [ReactMethod]
@@ -129,9 +129,9 @@ namespace RNNotifications
         }
 
         [ReactMethod]
-        public void getInitialNotification()
+        public void getInitialNotification(IPromise promise)
         {
-            throw new NotImplementedException();
+            promise.Resolve(new { });
         }
 
         [ReactMethod]
@@ -141,7 +141,7 @@ namespace RNNotifications
         }
 
         [ReactMethod]
-        public void cancelLocalNotifications()
+        public void cancelLocalNotifications(object details)
         {
             RNPushNotificationHelper.ClearAll();
         }
@@ -154,9 +154,9 @@ namespace RNNotifications
         }
 
         [ReactMethod]
-        public void registerNotificationActions()
+        public void registerNotificationActions(object details)
         {
-            throw new NotImplementedException();
+            // Not implemented yet.
         }
     }
 
