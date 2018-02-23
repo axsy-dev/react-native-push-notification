@@ -88,7 +88,7 @@ namespace RNNotifications
                     notificationContent = args.RawNotification.Content;
                     Context
                         .GetJavaScriptModule<RCTDeviceEventEmitter>()
-                        .emit("remoteNotificationReceived", new { content = notificationContent });
+                        .emit("remoteNotificationReceived", new { dataJSON = notificationContent });
                     break;
                 default:
                     break;
@@ -108,10 +108,10 @@ namespace RNNotifications
 
             if (rawNotification != null)
             {
-                var notification = JsonConvert.DeserializeObject<Notification>(rawNotification.Content);
-                notification.payload.id = currentid;
-                RNPushNotificationHelper.SendToast(notification);
-                RNPushNotificationHelper.SetBadgeNumber(notification.badge);
+                var rnRawNotification = JsonConvert.DeserializeObject<RNRawNotification>(rawNotification.Content);
+                rnRawNotification.payload.notification.id = currentid;
+                RNPushNotificationHelper.SendToast(rnRawNotification.payload.notification);
+                RNPushNotificationHelper.SetBadgeNumber(rnRawNotification.payload.badge);
                 currentid++;
             }
         }
@@ -167,14 +167,19 @@ namespace RNNotifications
         }
     }
 
-    public class Notification
+    public class RNRawNotification
     {
         public Payload payload { get; set; }
+    }
+
+    public class Payload
+    {
+        public Notification notification { get; set; }
 
         public int badge { get; set; }
     }
 
-    public class Payload
+    public class Notification
     {
         public string title { get; set; }
 

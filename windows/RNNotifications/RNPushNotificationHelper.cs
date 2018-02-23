@@ -13,7 +13,7 @@ namespace RNNotifications
             var doc = MakeDoc(notification).Result;
             var toastNotification = new ToastNotification(doc)
             {
-                Tag = notification.payload.id.ToString(),
+                Tag = notification.id.ToString(),
                 Group = "RNNotifications"
             };
 
@@ -51,8 +51,8 @@ namespace RNNotifications
                 await writer.WriteAttributeStringAsync(null, "template", null, "ToastText01");
 
                 await writer.WriteStartElementAsync(null, "text", null);
-                await writer.WriteAttributeStringAsync(null, "id", null, notification.payload.id.ToString());
-                await writer.WriteStringAsync(notification.payload.body);
+                await writer.WriteAttributeStringAsync(null, "id", null, notification.id.ToString());
+                await writer.WriteStringAsync(notification.title);
                 await writer.WriteEndElementAsync();
 
                 await writer.WriteEndElementAsync();
