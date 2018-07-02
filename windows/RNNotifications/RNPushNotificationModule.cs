@@ -108,10 +108,10 @@ namespace RNNotifications
 
             if (rawNotification != null)
             {
-                var rnRawNotification = JsonConvert.DeserializeObject<RNRawNotification>(rawNotification.Content);
-                rnRawNotification.payload.notification.id = currentid;
-                RNPushNotificationHelper.SendToast(rnRawNotification.payload.notification);
-                RNPushNotificationHelper.SetBadgeNumber(rnRawNotification.payload.badge);
+                var notification = JsonConvert.DeserializeObject<Notification>(rawNotification.Content);
+                notification.id = currentid;
+                RNPushNotificationHelper.SendToast(notification);
+                RNPushNotificationHelper.SetBadgeNumber(notification.badge);
                 currentid++;
             }
         }
@@ -167,18 +167,6 @@ namespace RNNotifications
         }
     }
 
-    public class RNRawNotification
-    {
-        public Payload payload { get; set; }
-    }
-
-    public class Payload
-    {
-        public Notification notification { get; set; }
-
-        public int badge { get; set; }
-    }
-
     public class Notification
     {
         public string title { get; set; }
@@ -186,6 +174,17 @@ namespace RNNotifications
         public string body { get; set; }
 
         public int id { get; set; }
+
+        public int badge { get; set; }
+
+        public UserData custom { get; set; }
+    }
+
+    public class UserData
+    {
+        public string workOrderId { get; set; }
+
+        public string serviceAppointmentId { get; set; }
     }
 
     public class ScheduledNotification : Notification
