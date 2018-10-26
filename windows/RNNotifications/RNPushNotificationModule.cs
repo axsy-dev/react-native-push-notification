@@ -90,6 +90,8 @@ namespace RNNotifications
                     notificationContent = args.BadgeNotification.Content.GetXml();
                     break;
                 case PushNotificationType.Raw:
+                    var notification = JsonConvert.DeserializeObject<Notification>(args.RawNotification.Content);
+                    RNPushNotificationHelper.SetBadgeNumber(notification.badge);
                     notificationContent = args.RawNotification.Content;
                     Context
                         .GetJavaScriptModule<RCTDeviceEventEmitter>()
