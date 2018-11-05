@@ -60,18 +60,6 @@ namespace RNNotifications
 
         public override async void Initialize()
         {
-            try {
-                var channel = await PushNotificationChannelManager.CreatePushNotificationChannelForApplicationAsync();
-                channel.PushNotificationReceived += OnPushNotification;
-                Debug.WriteLine(channel.Uri);
-
-                Context
-                    .GetJavaScriptModule<RCTDeviceEventEmitter>()
-                    .emit("remoteNotificationsRegistered", new { deviceToken = channel.Uri });
-            }
-            catch (Exception ex) {
-                Debug.WriteLine(ex);
-            }
         }
 
         private void OnPushNotification(PushNotificationChannel sender, PushNotificationReceivedEventArgs args)
@@ -124,9 +112,20 @@ namespace RNNotifications
         }
 
         [ReactMethod]
-        public void requestPermissions(string senderId)
+        public async void requestPermissions(string senderId)
         {
-            Debug.WriteLine(senderId);
+            try {
+                var channel = await PushNotificationChannelManager.CreatePushNotificationChannelForApplicationAsync();
+                channel.PushNotificationReceived += OnPushNotification;
+                Debug.WriteLine(channel.Uri);
+
+                Context
+                    .GetJavaScriptModule<RCTDeviceEventEmitter>()
+                    .emit("remoteNotificationsRegistered", new { deviceToken = channel.Uri });
+            }
+            catch (Exception ex) {
+                Debug.WriteLine(ex);
+            }
         }
 
         [ReactMethod]
