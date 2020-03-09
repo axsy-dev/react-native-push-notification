@@ -4,6 +4,7 @@ package com.dieam.reactnativepushnotification.modules;
 import android.app.AlarmManager;
 import android.app.Application;
 import android.app.Notification;
+import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -39,6 +40,7 @@ public class RNPushNotificationHelper {
     private static String NOTIFICATION_CHANNEL_ID_TMP = null;
 
     private Context context;
+    private RNPushNotificationConfig config;
     private final SharedPreferences scheduledNotificationsPersistence;
     private static final int ONE_MINUTE = 60 * 1000;
     private static final long ONE_HOUR = 60 * ONE_MINUTE;
@@ -46,6 +48,7 @@ public class RNPushNotificationHelper {
 
     public RNPushNotificationHelper(Application context) {
         this.context = context;
+        this.config = new RNPushNotificationConfig(context);
         this.scheduledNotificationsPersistence = context.getSharedPreferences(RNPushNotificationHelper.PREFERENCES_KEY, Context.MODE_PRIVATE);
     }
 
