@@ -16,7 +16,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.media.RingtoneManager;
-import android.media.AudioAttributes;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -216,11 +215,6 @@ public class RNPushNotificationHelper {
                     .setPriority(priority)
                     .setAutoCancel(bundle.getBoolean("autoCancel", true));
 
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) { // API 26 and higher
-                // Changing Default mode of notification
-                notification.setDefaults(Notification.DEFAULT_LIGHTS);
-            }
-
             String group = bundle.getString("group");
             if (group != null) {
                 notification.setGroup(group);
@@ -286,9 +280,8 @@ public class RNPushNotificationHelper {
             bundle.putBoolean("userInteraction", true);
             intent.putExtra("notification", bundle);
 
-            Uri soundUri = null;
             if (!bundle.containsKey("playSound") || bundle.getBoolean("playSound")) {
-                soundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+                Uri soundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
                 String soundName = bundle.getString("soundName");
                 if (soundName != null) {
                     if (!"default".equalsIgnoreCase(soundName)) {
@@ -306,18 +299,9 @@ public class RNPushNotificationHelper {
                         }
 
                         soundUri = Uri.parse("android.resource://" + context.getPackageName() + "/" + resId);
-
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) { // API 26 and higher
-                            NOTIFICATION_CHANNEL_ID_TMP = NOTIFICATION_CHANNEL_ID + "-" + soundName;
-                            notification.setChannelId(NOTIFICATION_CHANNEL_ID_TMP);
-                        }
                     }
                 }
                 notification.setSound(soundUri);
-            }
-
-            if (soundUri == null || Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                notification.setSound(null);
             }
 
             if (bundle.containsKey("ongoing") || bundle.getBoolean("ongoing")) {
